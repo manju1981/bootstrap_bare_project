@@ -1,0 +1,57 @@
+  <pipelines group="defaultGroup">
+    <pipeline name="Sample" template="base_pipeline">
+      <materials>
+        <git url="https://github.com/manju1981/bootstrap_bare_project" branch="main" />
+      </materials>
+    </pipeline>
+    <pipeline name="Team-1" template="base_pipeline">
+      <materials>
+        <git url="https://github.com/manju1981/bookstore_team1" branch="main" />
+      </materials>
+    </pipeline>
+    <pipeline name="Team-2" template="base_pipeline">
+      <materials>
+        <git url="https://github.com/manju1981/bookstore_team2" branch="main" />
+      </materials>
+    </pipeline>
+  </pipelines>
+  <templates>
+    <pipeline name="base_pipeline">
+      <stage name="Build">
+        <jobs>
+          <job name="compile">
+            <tasks>
+              <exec command="./gradlew">
+                <arg>compileJava</arg>
+              </exec>
+            </tasks>
+          </job>
+        </jobs>
+      </stage>
+      <stage name="Test">
+        <jobs>
+          <job name="test">
+            <tasks>
+              <exec command="./gradlew">
+                <arg>compileTestJava</arg>
+              </exec>
+            </tasks>
+          </job>
+        </jobs>
+      </stage>
+      <stage name="Package">
+        <jobs>
+          <job name="package">
+            <tasks>
+              <exec command="./gradlew">
+                <arg>bootJar</arg>
+              </exec>
+            </tasks>
+            <artifacts>
+              <artifact type="build" src="build/libs/*" />
+            </artifacts>
+          </job>
+        </jobs>
+      </stage>
+    </pipeline>
+  </templates>
