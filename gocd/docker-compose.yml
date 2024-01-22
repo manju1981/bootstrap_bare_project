@@ -1,0 +1,62 @@
+services:
+  server:
+    image: gocd/gocd-server:v23.5.0
+
+    ports:
+      - "8153:8153"
+      - "8154:8154"
+
+    volumes:
+      - ./data:/godata
+      - ./data/home:/home/go
+      - ./scripts/server:/docker-entrypoint.d
+      - ./scripts/shared:/shared
+
+    environment:
+      - GO_SERVER_SYSTEM_PROPERTIES=-Dcruise.material.update.interval=2000 -Dmaterial.update.idle.interval=2000
+
+    depends_on:
+      - "gitserver"
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 4G
+        reservations:
+          cpus: '0.0001'
+          memory: 500M
+
+  agent:
+    image: bootcamp/gocd-agent
+
+    environment:
+      - GO_SERVER_URL=http://server:8153/go
+      - AGENT_AUTO_REGISTER_KEY=cb757faf-415f-48dd-95d2-8d2829590912
+
+    volumes:
+      - ./scripts/agent:/docker-entrypoint.d
+      - ./scripts/shared:/shared
+
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 4G
+        reservations:
+          cpus: '0.0001'
+          memory: 500M
+
+    depends_on:
+      - "server"
+      - "gitserver"
+
+  gitserver:
+    image: k8sgerrit/apache-git-http-backend:latest
+
+    ports:
+      - "8155:80"
+
+    volumes:
+      - ./repositories:/git
